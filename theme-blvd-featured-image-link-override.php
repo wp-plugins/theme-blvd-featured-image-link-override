@@ -2,7 +2,7 @@
 /*
 Plugin Name: Theme Blvd Featured Image Link Override
 Description: When using a theme with Theme Blvd framework version 2.1.0+, this plugin allows you to set featured image link options globally throughout your site.
-Version: 1.0.1
+Version: 1.0.2
 Author: Jason Bobich
 Author URI: http://jasonbobich.com
 License: GPL2
@@ -102,7 +102,7 @@ function themeblvd_filo_post_thumbnail( $output, $location, $size, $link ) {
 	// The actual override. This is the whole point of this new 
 	// function. If the user has set the featured image link to 
 	// be inactive, we want to override it with our plugin's settings.
-	if( $thumb_link_meta == 'inactive' ) {
+	if( ! $thumb_link_meta || $thumb_link_meta == 'inactive' ) {
 
 		// Get "filo" plugin settings
 		$filo = themeblvd_get_option( 'filo' );
