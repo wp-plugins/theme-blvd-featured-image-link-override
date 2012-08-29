@@ -2,27 +2,28 @@
 /*
 Plugin Name: Theme Blvd Featured Image Link Override
 Description: When using a theme with Theme Blvd framework version 2.1.0+, this plugin allows you to set featured image link options globally throughout your site.
-Version: 1.0.0
+Version: 1.0.1
 Author: Jason Bobich
 Author URI: http://jasonbobich.com
 License: GPL2
-*/
+License: GPL2
 
-/*
-Copyright 2012 JASON BOBICH
+    Copyright 2012  Jason Bobich
 
-This program is free software; you can redistribute it and/or modify
-it under the terms of the GNU General Public License, version 2, as 
-published by the Free Software Foundation.
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the GNU General Public License version 2,
+    as published by the Free Software Foundation.
 
-This program is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-GNU General Public License for more details.
+    You may NOT assume that you can use any other version of the GPL.
 
-You should have received a copy of the GNU General Public License
-along with this program; if not, write to the Free Software
-Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    The license for this software can likely be found here:
+    http://www.gnu.org/licenses/gpl-2.0.html
+
 */
 
 /*
@@ -108,7 +109,7 @@ function themeblvd_filo_post_thumbnail( $output, $location, $size, $link ) {
 		$filo_single = themeblvd_get_option( 'filo_single' );
 		
 		// Only continue if user set an override option
-		if( $filo == 'post' || $filo = 'image' ) {
+		if( $filo == 'post' || $filo == 'image' ) {
 			
 			// Flip on override
 			$override = true;
