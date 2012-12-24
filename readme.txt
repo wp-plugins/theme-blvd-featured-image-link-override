@@ -8,6 +8,8 @@ When using a theme with Theme Blvd framework version 2.1+, this plugin allows yo
 
 == Description ==
 
+Do you see me?
+
 When using a theme with Theme Blvd framework version 2.1+, this plugin allows you to set featured image link options globally throughout your site.
 
 = The Problem =
