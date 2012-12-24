@@ -2,10 +2,9 @@
 /*
 Plugin Name: Theme Blvd Featured Image Link Override
 Description: When using a theme with Theme Blvd framework version 2.1.0+, this plugin allows you to set featured image link options globally throughout your site.
-Version: 1.0.2
+Version: 1.0.3
 Author: Jason Bobich
 Author URI: http://jasonbobich.com
-License: GPL2
 License: GPL2
 
     Copyright 2012  Jason Bobich
@@ -162,16 +161,22 @@ function themeblvd_filo_post_thumbnail( $output, $location, $size, $link ) {
 		
 		// Attributes
 		$size_class = $size;
-		if( $size_class == 'tb_small' ) $size_class = 'small';
+		if( $size_class == 'tb_small' )
+			$size_class = 'small';
 		$classes = 'attachment-'.$size_class.' wp-post-image';
+		if( ! $link )
+			$classes .= ' thumbnail';
 		if( is_single() ) $title = ' title="'.get_the_title($post->ID).'"';
+		$anchor_class = 'thumbnail';
+		if( $thumb_link_meta != 'thumbnail' )
+			$anchor_class .= ' '.$thumb_link_meta;
 		
 		// Final HTML output
 		if( has_post_thumbnail( $post->ID ) ) {
 			$output .= '<div class="featured-image-wrapper '.$classes.'">';
 			$output .= '<div class="featured-image">';
 			$output .= '<div class="featured-image-inner">';
-			if( $link ) $output .= '<a href="'.$link_url.'"'.$link_target.' class="'.$thumb_link_meta.'"'.$title.'>';	
+			if( $link ) $output .= '<a href="'.$link_url.'"'.$link_target.' class="'.$anchor_class.'"'.$title.'>';	
 			$output .= get_the_post_thumbnail( $post->ID, $size, array( 'class' => '' ) );
 			if( $link ) $output .= $end_link.'</a>';
 			$output .= '</div><!-- .featured-image-inner (end) -->';
