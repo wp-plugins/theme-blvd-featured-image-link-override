@@ -2,7 +2,7 @@
 Contributors: themeblvd
 Tags: themeblvd, featured images, thumbnails, links, filo
 Requires at least: Theme Blvd Framework 2.1+
-Stable tag: 1.0.4
+Stable tag: 1.0.5
 
 When using a theme with Theme Blvd framework version 2.1+, this plugin allows you to set featured image link options globally throughout your site.
 
@@ -33,6 +33,10 @@ The two options will apply to **ALL** of your posts that currently have the defa
 1. Options added to your current theme at *Appearance > Theme Options > Configuration*.
 
 == Changelog ==
+
+= 1.0.5 =
+
+* Compatibility for Theme Blvd Framework 2.5+.
 
 = 1.0.4 =
 

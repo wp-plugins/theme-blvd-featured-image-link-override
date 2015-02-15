@@ -2,7 +2,7 @@
 /*
 Plugin Name: Theme Blvd Featured Image Link Override
 Description: When using a theme with Theme Blvd framework version 2.1.0+, this plugin allows you to set featured image link options globally throughout your site.
-Version: 1.0.4
+Version: 1.0.5
 Author: Jason Bobich
 Author URI: http://jasonbobich.com
 License: GPL2
@@ -41,8 +41,12 @@ No biggy.
 
 function themeblvd_filo_options() {
 
+	if ( ! defined('TB_FRAMEWORK_VERSION') ) {
+		return;
+	}
+
 	// First make sure they're using a theme that supports this.
-	if( function_exists( 'themeblvd_add_option_section' ) ) {
+	if ( function_exists( 'themeblvd_add_option_section' ) ) {
 
 		// Add configuration tab, if it doesn't exist.
 		themeblvd_add_option_tab( 'config', __( 'Configuration', 'themeblvd_filo' ) );
@@ -79,6 +83,14 @@ function themeblvd_filo_options() {
 		// Add option section
 		themeblvd_add_option_section( 'config', 'filo', $name, $description, $options );
 	}
+
+	// Filter post thumbnail
+	if ( version_compare(TB_FRAMEWORK_VERSION, '2.5.0', '>=') ) {
+		add_filter( 'themeblvd_post_thumbnail', 'themeblvd_filo_post_thumbnail', 10, 3 );
+	} else {
+		add_filter( 'themeblvd_post_thumbnail', 'themeblvd_filo_post_thumbnail', 10, 4 );
+	}
+
 }
 add_action( 'after_setup_theme', 'themeblvd_filo_options' );
 
@@ -87,8 +99,7 @@ add_action( 'after_setup_theme', 'themeblvd_filo_options' );
  *
  * @since 1.0.0
  */
-
-function themeblvd_filo_post_thumbnail( $output, $location, $size, $link ) {
+function themeblvd_filo_post_thumbnail( $output, $location, $size, $link = null ) {
 
 	global $post;
 
@@ -105,27 +116,28 @@ function themeblvd_filo_post_thumbnail( $output, $location, $size, $link ) {
 	// The actual override. This is the whole point of this new
 	// function. If the user has set the featured image link to
 	// be inactive, we want to override it with our plugin's settings.
-	if( ! $thumb_link_meta || $thumb_link_meta == 'inactive' ) {
+	if ( ! $thumb_link_meta || $thumb_link_meta == 'inactive' ) {
 
 		// Get "filo" plugin settings
 		$filo = themeblvd_get_option( 'filo' );
 		$filo_single = themeblvd_get_option( 'filo_single' );
 
 		// Only continue if user set an override option
-		if( $filo == 'post' || $filo == 'image' ) {
+		if ( $filo == 'post' || $filo == 'image' ) {
 
 			// Flip on override
 			$override = true;
 
 			// Check for the single post override to the
 			// plugin override. Confused, yet?
-			if( $filo_single === 'false' && is_single() )
+			if ( $filo_single === 'false' && is_single() ) {
 				$override = false;
+			}
 
 			// No point moving forward if we're on a single
 			// post and the user has setup overrides not
 			// to take effect on single posts.
-			if( $override ) {
+			if ( $override ) {
 
 				// Setup attachment ID
 				$attachment_id = get_post_thumbnail_id( $post->ID );
@@ -151,44 +163,83 @@ function themeblvd_filo_post_thumbnail( $output, $location, $size, $link ) {
 	}
 
 	// Only re-do the post thumbnail if the $override is true.
-	if( $override ){
+	if ( $override ) {
 
 		// Additional link setup
-		if( is_single() ) $link_target = str_replace('[gallery]', '', $link_target );
-		$end_link = '<span class="image-overlay"><span class="image-overlay-bg"></span><span class="image-overlay-icon"></span></span>';
-		$end_link = apply_filters( 'themeblvd_image_overlay', $end_link );
+		if ( is_single() ) {
+			$link_target = str_replace('[gallery]', '', $link_target );
+		}
+
+		$end_link = '';
+
+		if ( version_compare(TB_FRAMEWORK_VERSION, '2.5.0', '<') ) {
+			$end_link = '<span class="image-overlay"><span class="image-overlay-bg"></span><span class="image-overlay-icon"></span></span>';
+			$end_link = apply_filters( 'themeblvd_image_overlay', $end_link );
+		}
 
 		// Reset output
 		$output = '';
 
-		// Image check
-		$image = wp_get_attachment_image_src( $attachment_id, $size );
-
 		// Attributes
 		$size_class = $size;
-		if( $size_class == 'tb_small' )
+
+		if ( $size_class == 'tb_small' ) {
 			$size_class = 'small';
-		$classes = 'attachment-'.$size_class.' wp-post-image';
-		if( ! $link )
-			$classes .= ' thumbnail';
-		if( is_single() ) $title = ' title="'.get_the_title($post->ID).'"';
-		$anchor_class = 'thumbnail';
-		if( $thumb_link_meta != 'thumbnail' )
+		}
+
+		$img_class = '';
+
+		if ( version_compare(TB_FRAMEWORK_VERSION, '2.5.0', '>=') ) {
+
+			if ( ! $link ) {
+
+				$img_class = 'featured-image';
+
+				if ( apply_filters('themeblvd_featured_thumb_frame', false) ) {
+					$img_class .= ' thumbnail';
+				}
+			}
+
+		} else {
+
+			$img_class = 'attachment-'.$size_class.' wp-post-image';
+
+			if ( ! $link ) {
+				$img_class .= ' thumbnail';
+			}
+		}
+
+		if ( is_single() ) {
+			$title = ' title="'.get_the_title($post->ID).'"';
+		}
+
+		$anchor_class = 'tb-thumb-link';
+
+		if ( version_compare(TB_FRAMEWORK_VERSION, '2.5.0', '<') || apply_filters('themeblvd_featured_thumb_frame', false) ) {
+			$anchor_class .= ' thumbnail';
+		}
+
+		if ( $thumb_link_meta != 'thumbnail' ) {
 			$anchor_class .= ' '.$thumb_link_meta;
+		}
 
 		// Build output
-		if( has_post_thumbnail( $post->ID ) ) {
+		if ( has_post_thumbnail( $post->ID ) ) {
 
 			// Image
-			$image = get_the_post_thumbnail( $post->ID, $size, array( 'class' => '' ) );
+			if ( version_compare(TB_FRAMEWORK_VERSION, '2.5.0', '>=') ) {
+				$image = get_the_post_thumbnail( $post->ID, $size, array( 'class' => $img_class ) );
+			} else {
+				$image = get_the_post_thumbnail( $post->ID, $size, array( 'class' => '' ) );
+			}
 
 			// Wrap in link
-			if( $link ) {
+			if ( $link ) {
 
 				if ( $lightbox && function_exists( 'themeblvd_get_link_to_lightbox' ) ) {
 
 					$args = apply_filters( 'themeblvd_featured_image_lightbox_args', array(
-						'item'	=> $image.themeblvd_get_image_overlay(),
+						'item'	=> $image.$end_link,
 						'link'	=> $link_url,
 						'class'	=> $anchor_class,
 						'title'	=> get_the_title()
@@ -207,13 +258,19 @@ function themeblvd_filo_post_thumbnail( $output, $location, $size, $link ) {
 			}
 
 			// Final output
-			$output .= '<div class="featured-image-wrapper '.$classes.'">';
-			$output .= '<div class="featured-image">';
-			$output .= '<div class="featured-image-inner">';
-			$output .= $image;
-			$output .= '</div><!-- .featured-image-inner (end) -->';
-			$output .= '</div><!-- .featured-image (end) -->';
-			$output .= '</div><!-- .featured-image-wrapper (end) -->';
+			if ( version_compare(TB_FRAMEWORK_VERSION, '2.5.0', '>=') ) {
+
+				$output = $image;
+
+			} else {
+				$output .= '<div class="featured-image-wrapper '.$img_class.'">';
+				$output .= '<div class="featured-image">';
+				$output .= '<div class="featured-image-inner">';
+				$output .= $image;
+				$output .= '</div><!-- .featured-image-inner (end) -->';
+				$output .= '</div><!-- .featured-image (end) -->';
+				$output .= '</div><!-- .featured-image-wrapper (end) -->';
+			}
 
 		}
 	}
@@ -222,4 +279,3 @@ function themeblvd_filo_post_thumbnail( $output, $location, $size, $link ) {
 	// then nothing has been modified with the output.
 	return $output;
 }
-add_filter( 'themeblvd_post_thumbnail', 'themeblvd_filo_post_thumbnail', 10, 4 );
